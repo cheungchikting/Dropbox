@@ -7,7 +7,6 @@ const uploadDir = path.join(__dirname, "uploaded")
 const port = 8000
 
 app.use(expressFileUpload())
-app.use(express.json())
 app.use(express.urlencoded({
   extended: true
 })) // fales only support shring and array 
@@ -98,13 +97,18 @@ app.post("/upload", (req, res) => {
   }
 });
 
-app.delete("/uploaded/:name", (req, res) => {
-  let name = req.params.name;
-  fs.unlink(name, (err) => {
+app.post("/delete/:index", (req, res) => {
+  let index = req.params.index;
+  let myJSON = JSON.parse(fs.readFileSync(path.join(__dirname, "data.json")))
+  let newJSON = myJSON.filter(function(each){
+    return each !== myJSON[index]
+  })
+  fs.writeFileSync(path.join(__dirname, "data.json"), JSON.stringify(newJSON, null, 2), (err) => {
     if (err) {
       console.log(err)
     }
   })
+  res.redirect("/");
 });
 
 
