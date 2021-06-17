@@ -53,7 +53,7 @@ app.get("/uploaded/:name", (req, res) => {
   });
 });
 
-app.post("/upload", (req, res) => { 
+app.post("/upload", (req, res) => {
   console.log(req.files.upload) // "/files" = "action" in form
   let reqUpload = req.files.upload //upload = "name" in inpçut
   let name = req.files.upload.name
@@ -62,18 +62,19 @@ app.post("/upload", (req, res) => {
 
   if (reqUpload.length > 1) {
     for (each of reqUpload) {
-      writeFile(each.name, each.data)
-      let EachNewFile = {
-        "fileName": each.name,
-        "fileSize": each.size,
-        "timeUpload": new Date().toLocaleString(),
-      };
-      let myJSON = JSON.parse(fs.readFileSync(path.join(__dirname, "data.json")))
-      myJSON.push(EachNewFile)
-      fs.writeFileSync(path.join(__dirname, "data.json"), JSON.stringify(myJSON, null, 2), (err) => {
-        if (err) {
-          console.log(err)
-        }
+      writeFile(each.name, each.data).then(() => {
+        let EachNewFile = {
+          "fileName": each.name,
+          "fileSize": each.size,
+          "timeUpload": new Date().toLocaleString(),
+        };
+        let myJSON = JSON.parse(fs.readFileSync(path.join(__dirname, "data.json")))
+        myJSON.push(EachNewFile)
+        fs.writeFileSync(path.join(__dirname, "data.json"), JSON.stringify(myJSON, null, 2), (err) => {
+          if (err) {
+            console.log(err)
+          }
+        })
       })
     }
     res.redirect("/");
@@ -98,9 +99,11 @@ app.post("/upload", (req, res) => {
 });
 
 app.post("/delete/:index", (req, res) => {
+  // grab index, and then delete it 
   let index = req.params.index;
+  console.log("Deleted item index", index)
   let myJSON = JSON.parse(fs.readFileSync(path.join(__dirname, "data.json")))
-  let newJSON = myJSON.filter(function(each){
+  let newJSON = myJSON.filter(function (each) {
     return each !== myJSON[index]
   })
   fs.writeFileSync(path.join(__dirname, "data.json"), JSON.stringify(newJSON, null, 2), (err) => {
